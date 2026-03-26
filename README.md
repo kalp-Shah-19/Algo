@@ -1,4 +1,4 @@
-# AI-Based Algo Trading System
+# AI-powered Algo Trading System
 
 An AI-powered algorithmic trading platform with backtesting, ML-based signal filtering, and performance analytics.
 
