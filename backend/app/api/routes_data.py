@@ -9,7 +9,15 @@ from app.services.backtest_service import calculate_advanced_metrics
 router = APIRouter()
 
 @router.get("/backtest/{symbol}")
-def backtest(symbol: str, strategy: str = "rsi", use_ml: bool = False):
+def backtest(
+    symbol: str,
+    strategy: str = "rsi",
+    use_ml: bool = False,
+    rsi_buy_below: int = 40,
+    rsi_sell_above: int = 60,
+    ema_fast: int = 9,
+    ema_slow: int = 20,
+    ):
     df = get_historical_data(symbol)
 
     df = add_indicators(df)
@@ -19,12 +27,19 @@ def backtest(symbol: str, strategy: str = "rsi", use_ml: bool = False):
     if use_ml:
         model = train_ml_model(df)
 
-    df = apply_strategy(df, strategy=strategy, use_ml=use_ml, model=model)
-
+    df = apply_strategy(
+        df,
+        strategy=strategy,
+        use_ml=use_ml,
+        model=model,
+        rsi_buy_below=rsi_buy_below,
+        rsi_sell_above=rsi_sell_above,
+        ema_fast=ema_fast,
+        ema_slow=ema_slow,
+    )
     df, trades = run_backtest(df)
     metrics = calculate_metrics(trades)
 
-    # ✅ ONLY RETURN COMPLETED TRADES (SELL)
     completed_trades = [t for t in trades if t["type"] == "SELL"]
     buy_trades = [t for t in trades if t["type"] == "BUY"]
     advanced = calculate_advanced_metrics(df)
@@ -53,7 +68,6 @@ def fetch_data(symbol: str):
 
     df = df.tail(10)
 
-    # Convert everything to safe JSON
     df = df.astype(str)
 
     return df.to_dict(orient="records")

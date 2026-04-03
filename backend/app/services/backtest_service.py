@@ -51,7 +51,6 @@ def run_backtest(df, initial_capital=100000):
             position = 0
             entry_price = 0
 
-        # Equity update
         if position > 0:
             equity = position * price
         else:
